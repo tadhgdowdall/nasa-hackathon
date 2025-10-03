@@ -4,11 +4,9 @@ import { useState } from "react";
 import axios from "axios";
 import SearchBar from "@/components/SearchBar";
 import ResultsList, { SearchResult } from "@/components/ResultsList";
-import { AlertCircle, Loader2, Rocket, Database } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { AlertCircle, Loader2 } from "lucide-react";
 
-export default function DashboardPage() {
+export default function SearchPage() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -21,7 +19,7 @@ export default function DashboardPage() {
 
     try {
       const response = await axios.get(
-        `http://localhost:5001/api/summaries?query=${encodeURIComponent(query)}`
+        `http://localhost:5000/api/summaries?query=${encodeURIComponent(query)}`
       );
 
       setResults(response.data);
@@ -39,71 +37,22 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen pt-24 pb-12">
       <div className="container mx-auto px-6">
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-2">
-                BioCosmos <span className="gradient-text">Dashboard</span>
-              </h1>
-              <p className="text-gray-400">
-                Explore NASA bioscience research library
-              </p>
-            </div>
-            <Link href="/">
-              <Button variant="outline">
-                <Rocket className="w-4 h-4 mr-2" />
-                Home
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="card-glass p-4">
-              <div className="flex items-center gap-3">
-                <Database className="w-8 h-8 text-space-cyan" />
-                <div>
-                  <p className="text-2xl font-bold">608</p>
-                  <p className="text-xs text-gray-400">Publications</p>
-                </div>
-              </div>
-            </div>
-            <div className="card-glass p-4">
-              <div className="flex items-center gap-3">
-                <Rocket className="w-8 h-8 text-space-purple" />
-                <div>
-                  <p className="text-2xl font-bold">50+</p>
-                  <p className="text-xs text-gray-400">Years</p>
-                </div>
-              </div>
-            </div>
-            <div className="card-glass p-4">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">🧬</span>
-                <div>
-                  <p className="text-2xl font-bold">100%</p>
-                  <p className="text-xs text-gray-400">Accessible</p>
-                </div>
-              </div>
-            </div>
-            <div className="card-glass p-4">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">🤖</span>
-                <div>
-                  <p className="text-2xl font-bold">AI</p>
-                  <p className="text-xs text-gray-400">Powered</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Search <span className="gradient-text">Publications</span>
+          </h1>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Explore 608 NASA bioscience publications with AI-powered search
+          </p>
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">
-            Search Publications
-          </h2>
+        {/* Search Bar */}
+        <div className="mb-12">
           <SearchBar onSearch={handleSearch} loading={loading} />
         </div>
 
+        {/* Loading State */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-12">
             <Loader2 className="w-12 h-12 text-space-purple animate-spin mb-4" />
@@ -111,6 +60,7 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Error State */}
         {error && !loading && (
           <div className="card-glass p-6 border-red-500/50 max-w-2xl mx-auto">
             <div className="flex items-start gap-3">
@@ -123,6 +73,7 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Results */}
         {!loading && !error && hasSearched && (
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -136,11 +87,12 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Initial State */}
         {!loading && !error && !hasSearched && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-semibold text-gray-300 mb-2">
-              Ready to explore
+              Start your search
             </h3>
             <p className="text-gray-400">
               Enter a query above to search through NASA bioscience publications
