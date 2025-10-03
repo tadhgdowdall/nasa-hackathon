@@ -1,8 +1,17 @@
+import Header from '@/components/Header'
+import Hero from '@/components/Hero'
+import Stats from '@/components/Stats'
+import Footer from '@/components/Footer'
+
 export default function Home() {
   return (
-    <main>
-      <h1>BioCosmos Dashboard</h1>
-      <p>AI-powered NASA bioscience publications explorer</p>
-    </main>
+    <>
+      <Header />
+      <main>
+        <Hero />
+        <Stats />
+      </main>
+      <Footer />
+    </>
   )
 }
