@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { Rocket } from 'lucide-react'
-import Link from 'next/link'
+import { Rocket } from "lucide-react";
+import Link from "next/link";
 
 export default function Header() {
   return (
@@ -13,12 +13,12 @@ export default function Header() {
               <Rocket className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold gradient-text">BioCosmos Dashboard</h1>
+              <h1 className="text-xl font-bold gradient-text">BioCosmos</h1>
               <p className="text-xs text-gray-400">NASA Space Apps 2025</p>
             </div>
           </Link>
         </div>
       </nav>
     </header>
-  )
+  );
 }
