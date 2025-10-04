@@ -4,7 +4,7 @@ AI-powered NASA bioscience publications explorer for the 2025 NASA Space Apps Ch
 
 **Challenge**: Build a Space Biology Knowledge Engine
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -39,7 +39,7 @@ npm run dev
 
 Frontend runs at: `http://localhost:3000`
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 nasa-hackathon/
@@ -62,7 +62,7 @@ nasa-hackathon/
 └── README.md
 ```
 
-## 🌟 Features
+## Features
 
 - **AI-Enhanced Search**: Natural language keyword extraction with stop words filtering for intelligent search queries
 - **AI Chatbot**: Ask questions in plain English using Google Gemini AI (e.g., "What does microgravity do to bones?")
@@ -79,7 +79,7 @@ nasa-hackathon/
 - `GET /api/topics` - Get topic distribution statistics
 - `GET /api/health` - Health check
 
-## 🎨 Tech Stack
+## Tech Stack
 
 ### Frontend
 - **Framework**: Next.js 14, React 18, TypeScript
@@ -101,7 +101,7 @@ nasa-hackathon/
 - Coverage: 608 bioscience publications relevant to Moon and Mars missions
 - Format: CSV with titles, summaries, topics, and publication details
 
-## 📚 References & Credits
+## References & Credits
 
 ### Data & APIs
 - **NASA Space Biology Publications**: Dataset provided by NASA for the Space Apps Challenge. Source repository: https://github.com/jgalazka/SB_publications
@@ -125,14 +125,11 @@ nasa-hackathon/
 - NASA imagery and branding guidelines followed from: https://www.nasa.gov/multimedia/guidelines/
 - Stop words list for search functionality adapted from common English stop words corpus
 
-## 📝 License
+## License
 
 This project was created for the 2025 NASA Space Apps Challenge. All third-party assets and libraries are credited above with their respective licenses.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - NASA Space Apps Challenge organizers and mentors
 - NASA Space Biology program for providing the publications dataset
-- Google for providing free-tier access to Gemini AI
-- Three.js and React Three Fiber communities for 3D graphics tools
-- Unsplash and NASA for freely available space imagery
