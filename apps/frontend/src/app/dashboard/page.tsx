@@ -122,6 +122,12 @@ export default function DashboardPage() {
       // 3. Call OpenAI with context
       setChatbotResponse("Analyzing research with AI...");
 
+      // Check if API key is configured
+      if (!process.env.NEXT_PUBLIC_OPENAI_API_KEY) {
+        setChatbotResponse("⚠️ OpenAI API key not configured. Please add your API key to .env.local\n\nGet your key from: https://platform.openai.com/api-keys");
+        return;
+      }
+
       const openai = new OpenAI({
         apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
         dangerouslyAllowBrowser: true // Only for hackathon demo - use API route in production
