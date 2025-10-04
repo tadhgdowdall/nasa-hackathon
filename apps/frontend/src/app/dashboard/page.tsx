@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
+import OpenAI from "openai";
 import SearchBar from "@/components/SearchBar";
 import ResultsList, { SearchResult } from "@/components/ResultsList";
 import TopicChart from "@/components/TopicChart";
+import Chatbot from "@/components/Chatbot";
 import { AlertCircle, Loader2, Rocket, Database, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -21,6 +23,7 @@ export default function DashboardPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<string>("All");
+  const [chatbotResponse, setChatbotResponse] = useState("");
 
   useEffect(() => {
     // Fetch topics on component mount
@@ -89,19 +92,98 @@ export default function DashboardPage() {
     }
   };
 
+  /**
+   * Handle chatbot natural language queries
+   * Fetches from /api/summaries and uses OpenAI to generate intelligent responses
+   */
+  const handleChatQuery = async (query: string) => {
+    setLoading(true);
+    setError("");
+    setHasSearched(true);
+    setChatbotResponse("Searching for relevant studies...");
+
+    try {
+      // 1. Fetch relevant summaries from backend
+      const url = `http://localhost:5001/api/summaries?query=${encodeURIComponent(query)}&limit=10`;
+      const response = await axios.get(url);
+      const fetchedResults: SearchResult[] = response.data;
+      setResults(fetchedResults);
+
+      if (fetchedResults.length === 0) {
+        setChatbotResponse(`No studies found for "${query}". Try a different question or browse by topic.`);
+        return;
+      }
+
+      // 2. Format summaries as context for LLM
+      const context = fetchedResults.map((r, i) =>
+        `Study ${i + 1}: ${r.Title}\nSummary: ${r.Summary}\nTopic: ${r.Topic || 'N/A'}`
+      ).join('\n\n');
+
+      // 3. Call OpenAI with context
+      setChatbotResponse("Analyzing research with AI...");
+
+      const openai = new OpenAI({
+        apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+        dangerouslyAllowBrowser: true // Only for hackathon demo - use API route in production
+      });
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini", // Fast and cost-effective for hackathon
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful space biology research assistant analyzing NASA publications. Provide clear, concise answers based on the research summaries provided. Cite study titles when relevant. Keep responses under 300 words."
+          },
+          {
+            role: "user",
+            content: `Question: ${query}\n\nRelevant Research from NASA Publications:\n\n${context}\n\nBased on these studies, please provide a clear and informative answer to the question.`
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 500
+      });
+
+      const aiResponse = completion.choices[0]?.message?.content || "No response generated.";
+      setChatbotResponse(aiResponse);
+
+    } catch (err: any) {
+      console.error("Chatbot query error:", err);
+
+      // Check if it's an API key error
+      if (err.message?.includes('API key')) {
+        setChatbotResponse("⚠️ OpenAI API key not configured. Please add your API key to .env.local\n\nGet your key from: https://platform.openai.com/api-keys");
+      } else {
+        setError("Failed to process your question. Please check the console for details.");
+        setChatbotResponse("Sorry, I couldn't process your question. Please try again.");
+      }
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen pt-24 pb-12">
-      <div className="container mx-auto px-6">
-        {/* Mission-focused Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                BioCosmos <span className="gradient-text">Research Explorer</span>
-              </h1>
-              <p className="text-gray-400 text-sm">
-                Unlocking NASA's 608 bioscience publications for Moon & Mars missions
-              </p>
+    <div className="min-h-screen pb-12">
+      {/* Hero Banner */}
+      <div className="relative h-[400px] w-full overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?q=80&w=2071')",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-space-dark" />
+        <div className="relative container mx-auto px-6 h-full flex flex-col justify-center items-center text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white">
+            BioCosmos <span className="gradient-text">Research Explorer</span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-200 mb-6 max-w-3xl">
+            Unlocking NASA's 608 bioscience publications for Moon & Mars missions
+          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
+              <span className="text-2xl">🚀</span>
+              <span className="text-sm text-gray-200">Mission Support Tool</span>
             </div>
             <Link href="/">
               <Button variant="outline" size="sm">
@@ -110,13 +192,17 @@ export default function DashboardPage() {
               </Button>
             </Link>
           </div>
+        </div>
+      </div>
 
-          {/* Mission Context Banner */}
+      <div className="container mx-auto px-6 pt-12">
+        {/* Mission Context Banner */}
+        <div className="mb-8">
           <div className="card-glass p-4 border-l-4 border-space-purple">
             <div className="flex items-start gap-3">
-              <div className="text-2xl">🚀</div>
+              <div className="text-2xl">📋</div>
               <div>
-                <h3 className="font-semibold text-sm mb-1">Mission Support Tool</h3>
+                <h3 className="font-semibold text-sm mb-1">About This Tool</h3>
                 <p className="text-xs text-gray-400 leading-relaxed">
                   Explore decades of space biology research to identify progress in human health studies,
                   discover gaps in Mars environment research, and generate hypotheses for upcoming missions.
@@ -211,6 +297,15 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* AI Chatbot Section */}
+        <div className="mb-8">
+          <Chatbot
+            onQuery={handleChatQuery}
+            loading={loading}
+            responseText={chatbotResponse}
+          />
         </div>
 
         {loading && (
