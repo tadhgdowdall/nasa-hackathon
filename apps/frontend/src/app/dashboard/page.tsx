@@ -6,7 +6,7 @@ import SearchBar from "@/components/SearchBar";
 import ResultsList, { SearchResult } from "@/components/ResultsList";
 import TopicChart from "@/components/TopicChart";
 import Chatbot from "@/components/Chatbot";
-import { AlertCircle, Loader2, Rocket, Database, Filter } from "lucide-react";
+import { AlertCircle, Loader2, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -24,8 +24,8 @@ export default function DashboardPage() {
   const [selectedTopic, setSelectedTopic] = useState<string>("All");
   const [chatbotResponse, setChatbotResponse] = useState("");
 
+  // Fetch topics once on mount
   useEffect(() => {
-    // Fetch topics on component mount
     const fetchTopics = async () => {
       try {
         const response = await axios.get("http://localhost:5001/api/topics");
@@ -34,10 +34,10 @@ export default function DashboardPage() {
         console.error("Error fetching topics:", err);
       }
     };
-
     fetchTopics();
   }, []);
 
+  // Standard search
   const handleSearch = async (query: string) => {
     setLoading(true);
     setError("");
@@ -45,8 +45,6 @@ export default function DashboardPage() {
 
     try {
       let url = `http://localhost:5001/api/summaries?query=${encodeURIComponent(query)}`;
-
-      // Add topic filter if not "All"
       if (selectedTopic !== "All") {
         url += `&topic=${encodeURIComponent(selectedTopic)}`;
       }
@@ -64,6 +62,7 @@ export default function DashboardPage() {
     }
   };
 
+  // Browse all publications in a topic
   const handleBrowseTopic = async () => {
     if (selectedTopic === "All") return;
 
@@ -72,11 +71,12 @@ export default function DashboardPage() {
     setHasSearched(true);
 
     try {
-      // Find the count for the selected topic to request all publications
       const topicData = topics.find((t) => t.name === selectedTopic);
       const limit = topicData ? Math.min(topicData.count, 200) : 100;
 
-      const url = `http://localhost:5001/api/summaries?topic=${encodeURIComponent(selectedTopic)}&limit=${limit}`;
+      const url = `http://localhost:5001/api/summaries?topic=${encodeURIComponent(
+        selectedTopic,
+      )}&limit=${limit}`;
 
       const response = await axios.get(url);
       setResults(response.data);
@@ -91,10 +91,7 @@ export default function DashboardPage() {
     }
   };
 
-  /**
-   * Handle chatbot natural language queries
-   * Uses backend Gemini API integration to generate intelligent responses
-   */
+  // AI chatbot query
   const handleChatQuery = async (query: string) => {
     setLoading(true);
     setError("");
@@ -102,22 +99,18 @@ export default function DashboardPage() {
     setChatbotResponse("Analyzing your question with AI...");
 
     try {
-      // Call backend chatbot endpoint
       const response = await axios.post("http://localhost:5001/api/chat", {
         query,
         limit: 10,
       });
 
       const { response: aiResponse, results: fetchedResults } = response.data;
-
       setResults(fetchedResults);
       setChatbotResponse(aiResponse);
     } catch (err: any) {
       console.error("Chatbot query error:", err);
-
       const errorMsg = err.response?.data?.error || "";
 
-      // Check if it's a rate limit error
       if (
         err.response?.status === 429 ||
         errorMsg.includes("Rate limit exceeded") ||
@@ -126,9 +119,7 @@ export default function DashboardPage() {
         setChatbotResponse(
           `${errorMsg}\n\nFree tier limits:\n• 15 requests per minute\n• 1,500 requests per day\n\nPlease wait a moment and try again.`,
         );
-      }
-      // Check if it's an API key error
-      else if (errorMsg.includes("GEMINI_API_KEY")) {
+      } else if (errorMsg.includes("GEMINI_API_KEY")) {
         setChatbotResponse(
           "Gemini API key not configured. Please add GEMINI_API_KEY to your backend .env file\n\nGet your key from: https://aistudio.google.com/app/apikey",
         );
@@ -140,6 +131,7 @@ export default function DashboardPage() {
           "Sorry, I couldn't process your question. Please try again.",
         );
       }
+
       setResults([]);
     } finally {
       setLoading(false);
@@ -177,6 +169,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="container mx-auto px-6 pt-12">
         {/* Topic Distribution Chart */}
         <div className="card-glass p-6 mb-8">
@@ -200,25 +193,22 @@ export default function DashboardPage() {
 
         {/* Explore & Search Section */}
         <div className="card-glass p-6 mb-8">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold mb-2">
-              Explore Publications
-            </h2>
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-2">Explore Publications</h2>
             <p className="text-sm text-gray-400">
               Search by keywords or browse by research topic to discover
               relevant studies
             </p>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-4 mb-4 items-end">
-            <div className="flex-1">
-              <SearchBar onSearch={handleSearch} loading={loading} />
-            </div>
-            <div className="flex gap-2">
+          {/* Search + Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start mb-4">
+            <SearchBar onSearch={handleSearch} loading={loading} />
+            <div className="flex gap-3">
               <select
                 value={selectedTopic}
                 onChange={(e) => setSelectedTopic(e.target.value)}
-                className="px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-space-purple focus:border-transparent [&>option]:bg-space-dark [&>option]:text-white min-w-[200px]"
+                className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-space-purple focus:border-transparent [&>option]:bg-space-dark [&>option]:text-white"
               >
                 <option value="All">All Topics</option>
                 {topics.map((topic) => (
@@ -227,6 +217,7 @@ export default function DashboardPage() {
                   </option>
                 ))}
               </select>
+
               {selectedTopic !== "All" && (
                 <Button
                   onClick={handleBrowseTopic}
@@ -249,6 +240,7 @@ export default function DashboardPage() {
           />
         </div>
 
+        {/* Loading State */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-12">
             <Loader2 className="w-12 h-12 text-space-purple animate-spin mb-4" />
@@ -256,6 +248,7 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Error State */}
         {error && !loading && (
           <div className="card-glass p-6 border-red-500/50 max-w-2xl mx-auto">
             <div className="flex items-start gap-3">
@@ -274,7 +267,7 @@ export default function DashboardPage() {
             <div className="mb-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">
-                  Research Results
+                  Research Results{" "}
                   {selectedTopic !== "All" && (
                     <span className="text-sm font-normal text-gray-400 ml-2">
                       - {selectedTopic}
@@ -295,6 +288,7 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Empty State (before searching) */}
         {!loading && !error && !hasSearched && (
           <div className="card-glass p-12 text-center">
             <div className="max-w-md mx-auto">
