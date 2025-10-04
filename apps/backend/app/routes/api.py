@@ -9,14 +9,22 @@ def health():
 
 @bp.route('/summaries', methods=['GET'])
 def get_summaries():
-    """Search publications by query"""
+    """Search publications by query and/or filter by topic"""
     query = request.args.get('query', '')
+    limit = request.args.get('limit', default=20, type=int)
+    topic = request.args.get('topic', default=None, type=str)
 
-    if not query:
-        return jsonify({'error': 'Query parameter is required'}), 400
+    # Allow browsing by topic without a query
+    if not query and not topic:
+        return jsonify({'error': 'Either query or topic parameter is required'}), 400
+
+    # Cap limit at 200 for topic browsing, 100 for search
+    max_limit = 200 if (topic and not query) else 100
+    if limit > max_limit:
+        limit = max_limit
 
     try:
-        results = data_service.search_publications(query, limit=5)
+        results = data_service.search_publications(query, limit=limit, topic=topic)
         return jsonify(results)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

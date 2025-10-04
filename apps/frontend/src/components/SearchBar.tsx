@@ -39,7 +39,7 @@ export default function SearchBar({ onSearch, loading }: SearchBarProps) {
                 setError("");
               }}
               placeholder="Search NASA bioscience publications..."
-              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 backdrop-blur-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-space-purple focus:border-transparent transition-all"
+              className="w-full h-11 px-4 rounded-lg bg-white/5 border border-white/20 backdrop-blur-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-space-purple focus:border-transparent transition-all"
               disabled={loading}
             />
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />

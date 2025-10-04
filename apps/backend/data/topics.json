@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Other",
+    "count": 161
+  },
+  {
+    "name": "Human Health",
+    "count": 114
+  },
+  {
+    "name": "Microgravity",
+    "count": 113
+  },
+  {
+    "name": "Plants",
+    "count": 110
+  },
+  {
+    "name": "Cell Biology",
+    "count": 76
+  },
+  {
+    "name": "Radiation",
+    "count": 23
+  },
+  {
+    "name": "Development",
+    "count": 6
+  },
+  {
+    "name": "Metabolism",
+    "count": 4
+  }
+]
