@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import OpenAI from "openai";
 import SearchBar from "@/components/SearchBar";
 import ResultsList, { SearchResult } from "@/components/ResultsList";
 import TopicChart from "@/components/TopicChart";
@@ -94,66 +93,40 @@ export default function DashboardPage() {
 
   /**
    * Handle chatbot natural language queries
-   * Fetches from /api/summaries and uses OpenAI to generate intelligent responses
+   * Uses backend Gemini API integration to generate intelligent responses
    */
   const handleChatQuery = async (query: string) => {
     setLoading(true);
     setError("");
     setHasSearched(true);
-    setChatbotResponse("Searching for relevant studies...");
+    setChatbotResponse("Analyzing your question with AI...");
 
     try {
-      // 1. Fetch relevant summaries from backend
-      const url = `http://localhost:5001/api/summaries?query=${encodeURIComponent(query)}&limit=10`;
-      const response = await axios.get(url);
-      const fetchedResults: SearchResult[] = response.data;
+      // Call backend chatbot endpoint
+      const response = await axios.post("http://localhost:5001/api/chat", {
+        query,
+        limit: 10
+      });
+
+      const { response: aiResponse, results: fetchedResults } = response.data;
+
       setResults(fetchedResults);
-
-      if (fetchedResults.length === 0) {
-        setChatbotResponse(`No studies found for "${query}". Try a different question or browse by topic.`);
-        return;
-      }
-
-      // 2. Format summaries as context for LLM
-      const context = fetchedResults.map((r, i) =>
-        `Study ${i + 1}: ${r.Title}\nSummary: ${r.Summary}\nTopic: ${r.Topic || 'N/A'}`
-      ).join('\n\n');
-
-      // 3. Call OpenAI with context
-      setChatbotResponse("Analyzing research with AI...");
-
-      const openai = new OpenAI({
-        apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-        dangerouslyAllowBrowser: true // Only for hackathon demo - use API route in production
-      });
-
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini", // Fast and cost-effective for hackathon
-        messages: [
-          {
-            role: "system",
-            content: "You are a helpful space biology research assistant analyzing NASA publications. Provide clear, concise answers based on the research summaries provided. Cite study titles when relevant. Keep responses under 300 words."
-          },
-          {
-            role: "user",
-            content: `Question: ${query}\n\nRelevant Research from NASA Publications:\n\n${context}\n\nBased on these studies, please provide a clear and informative answer to the question.`
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      });
-
-      const aiResponse = completion.choices[0]?.message?.content || "No response generated.";
       setChatbotResponse(aiResponse);
 
     } catch (err: any) {
       console.error("Chatbot query error:", err);
 
+      const errorMsg = err.response?.data?.error || '';
+
+      // Check if it's a rate limit error
+      if (err.response?.status === 429 || errorMsg.includes('Rate limit exceeded') || errorMsg.includes('Daily limit exceeded')) {
+        setChatbotResponse(`⏱️ ${errorMsg}\n\nFree tier limits:\n• 15 requests per minute\n• 1,500 requests per day\n\nPlease wait a moment and try again.`);
+      }
       // Check if it's an API key error
-      if (err.message?.includes('API key')) {
-        setChatbotResponse("⚠️ OpenAI API key not configured. Please add your API key to .env.local\n\nGet your key from: https://platform.openai.com/api-keys");
+      else if (errorMsg.includes('GEMINI_API_KEY')) {
+        setChatbotResponse("⚠️ Gemini API key not configured. Please add GEMINI_API_KEY to your backend .env file\n\nGet your key from: https://aistudio.google.com/app/apikey");
       } else {
-        setError("Failed to process your question. Please check the console for details.");
+        setError("Failed to process your question. Please check the backend server.");
         setChatbotResponse("Sorry, I couldn't process your question. Please try again.");
       }
       setResults([]);

@@ -2,22 +2,30 @@
 
 ## Quick Start
 
-### 1. Get OpenAI API Key
-1. Go to https://platform.openai.com/api-keys
-2. Sign up or log in
-3. Click "Create new secret key"
-4. Copy the key (starts with `sk-`)
+### 1. Get Gemini API Key
+1. Go to https://aistudio.google.com/app/apikey
+2. Sign up or log in with your Google account
+3. Click "Create API key"
+4. Copy the key
 
-### 2. Add API Key to Environment
-Edit `apps/frontend/.env.local`:
+### 2. Add API Key to Backend Environment
+Create or edit `apps/backend/.env`:
 ```bash
-NEXT_PUBLIC_OPENAI_API_KEY=sk-your-actual-key-here
+GEMINI_API_KEY=your-gemini-api-key-here
 ```
 
-### 3. Restart Frontend Server
+### 3. Install Backend Dependencies (if not already done)
 ```bash
-# Stop the current dev server (Ctrl+C)
-npm run dev
+cd apps/backend
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 4. Restart Backend Server
+```bash
+cd apps/backend
+source venv/bin/activate
+python run.py
 ```
 
 ## Testing the Chatbot
@@ -28,46 +36,46 @@ npm run dev
 - "What are the effects of spaceflight on the immune system?"
 
 ### How It Works:
-1. User asks a natural language question
-2. Backend searches NASA publications for relevant summaries
-3. OpenAI analyzes the summaries and generates an intelligent response
-4. Results display below the chatbot response
+1. User asks a natural language question via the frontend
+2. Frontend sends request to backend `/api/chat` endpoint
+3. Backend searches NASA publications for relevant summaries
+4. Backend uses Gemini API to analyze summaries and generate intelligent response
+5. Response and results are sent back to frontend for display
 
 ## Cost Estimate
 
-Using `gpt-4o-mini`:
-- **Input:** $0.150 per 1M tokens
-- **Output:** $0.600 per 1M tokens
-- **Typical query:** ~2,000 input tokens + 500 output tokens
-- **Cost per query:** ~$0.0006 (less than a cent)
-- **100 queries:** ~$0.06
+Using `gemini-1.5-flash` (Free Tier):
+- **Free tier:** Up to 15 requests per minute
+- **Rate limit:** 1,500 requests per day
+- **Perfect for development and hackathons**
+- **No cost for typical usage**
 
-OpenAI provides $5 in free credits for new accounts.
+Note: Gemini offers a generous free tier, making it ideal for this project.
 
 ## Troubleshooting
 
-### "API key not configured" message:
-- Make sure `.env.local` exists in `apps/frontend/`
-- Verify the key starts with `sk-`
-- Restart the Next.js dev server
+### "GEMINI_API_KEY not configured" message:
+- Make sure `.env` file exists in `apps/backend/` directory
+- Verify you've added the correct API key from Google AI Studio
+- Restart the Flask backend server
 
 ### No response from chatbot:
 - Check browser console for errors (F12)
-- Verify Flask backend is running on port 5001
-- Check OpenAI API key has credits
+- Verify Flask backend is running on port 5001 (`python run.py`)
+- Check that you've installed all requirements (`pip install -r requirements.txt`)
+- Verify Gemini API key is valid
 
 ### Rate limit errors:
-- Free tier: 3 requests/minute
-- Paid tier (Tier 1): 500 requests/minute
+- Free tier: 15 requests/minute, 1,500/day
 - Wait a minute and try again
+- Consider upgrading if needed
 
-## Production Notes
+## Security Notes
 
-⚠️ **For hackathon demo only!**
+✅ **Secure Implementation**
 
-The current implementation uses `dangerouslyAllowBrowser: true` to call OpenAI directly from the browser.
-
-**For production:**
-- Move OpenAI calls to a Next.js API route (`app/api/chat/route.ts`)
-- Use `OPENAI_API_KEY` (without `NEXT_PUBLIC_` prefix)
-- This keeps the API key secure on the server
+The API key is stored securely on the backend server:
+- Gemini API calls are made from the Flask backend only
+- Frontend never has access to the API key
+- API key is stored in `.env` file (not committed to git)
+- This is production-ready and secure

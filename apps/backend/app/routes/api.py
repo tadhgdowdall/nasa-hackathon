@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app.services.data_service import data_service
+from app.services.chatbot_service import chatbot_service
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -35,5 +36,37 @@ def get_topics():
     try:
         topics = data_service.get_topics()
         return jsonify(topics)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/chat', methods=['POST'])
+def chat():
+    """Handle chatbot queries with AI-generated responses"""
+    try:
+        data = request.get_json()
+        query = data.get('query', '')
+
+        if not query:
+            return jsonify({'error': 'Query parameter is required'}), 400
+
+        # Get search results from data service
+        limit = data.get('limit', 10)
+        search_results = data_service.search_publications(query, limit=limit)
+
+        # Generate AI response using Gemini
+        ai_response = chatbot_service.generate_response(query, search_results)
+
+        return jsonify({
+            'response': ai_response,
+            'results': search_results
+        })
+
+    except ValueError as e:
+        # Rate limit or API key errors
+        error_msg = str(e)
+        if 'Rate limit exceeded' in error_msg or 'Daily limit exceeded' in error_msg:
+            return jsonify({'error': error_msg}), 429  # 429 Too Many Requests
+        else:
+            return jsonify({'error': error_msg}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
