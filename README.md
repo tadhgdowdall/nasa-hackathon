@@ -21,10 +21,17 @@ Backend runs at: `http://localhost:5001`
 ```bash
 cd apps/frontend
 npm install
+
+# Copy environment template and add your OpenAI API key
+cp .env.local.example .env.local
+# Edit .env.local and add your OpenAI API key (get one from https://platform.openai.com/api-keys)
+
 npm run dev
 ```
 
 Frontend runs at: `http://localhost:3000`
+
+**Note:** To use the AI chatbot feature, you need to add your OpenAI API key to `.env.local`. See `apps/frontend/CHATBOT_SETUP.md` for detailed instructions.
 
 ## 📁 Project Structure
 
@@ -49,6 +56,7 @@ nasa-hackathon/
 
 ## 🌟 Features
 
+- **AI Chatbot**: Ask natural language questions about space biology research and get AI-powered answers based on NASA publications
 - **Search**: Query 607 NASA bioscience publications by title
 - **Dashboard**: View stats and explore publications
 - **Space Theme**: NASA-inspired UI with animations
@@ -68,4 +76,5 @@ Publications from: [NASA SB Publications](https://github.com/jgalazka/SB_publica
 
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS, shadcn/ui
 - **Backend**: Flask, Pandas, Python 3.11
+- **AI**: OpenAI GPT-4o-mini for intelligent research query responses
 - **Data**: NASA Life Sciences CSV (607 publications)
