@@ -27,8 +27,8 @@ export default function Chatbot({ onQuery, loading, responseText }: ChatbotProps
   return (
     <div className="card-glass p-6">
       <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
-          <span>💬</span> Ask About Space Biology
+        <h2 className="text-xl font-semibold mb-2">
+          Ask About Space Biology
         </h2>
         <p className="text-sm text-gray-400">
           Ask natural language questions about space biology research (e.g., "What does microgravity do to bones?")
