@@ -62,6 +62,12 @@ nasa-hackathon/
 └── README.md
 ```
 
+## Slides
+<img width="1470" height="949" alt="image" src="https://github.com/user-attachments/assets/08fe92c8-a447-44f7-9e80-f64d7a76e0f1" />
+<img width="1470" height="956" alt="image" src="https://github.com/user-attachments/assets/6b0da7ae-a015-496e-92b0-ed9abaa88b22" />
+
+
+
 ## Features
 
 - **AI-Enhanced Search**: Natural language keyword extraction with stop words filtering for intelligent search queries
